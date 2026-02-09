@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бургер 1 - 3D Просмотр</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff9900;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-btn:hover {
+            background: #e68a00;
+        }
+
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            font-size: 24px;
+            z-index: 9999;
+        }
+
+        .info {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body style="margin: 0; overflow: hidden;">
+    <div class="loading" id="loading">Загрузка бургера... 🍔</div>
+
+    <a href="/" class="back-btn">← Вернуться</a>
+
+    <div class="info">
+        <strong>🍔 Бургер 1</strong><br>
+        Используйте мышь для вращения и масштабирования
+    </div>
+
+    <a-scene embedded>
+        <a-assets>
+            <a-asset-item id="burger-model" src="models/glb/burger1.glb"></a-asset-item>
+        </a-assets>
+
+        <a-entity gltf-model="#burger-model" scale="0.15 0.15 0.15" position="0 0 -3" rotation="-90 0 0"
+            animation="property: rotation; to: -90 360 0; loop: true; dur: 10000; easing: linear">
+        </a-entity>
+
+        <a-entity camera look-controls wasd-controls></a-entity>
+    </a-scene>
+
+    <script>
+        document.querySelector('a-scene').addEventListener('loaded', function () {
+            const loader = document.getElementById('loading');
+            if (loader) {
+                loader.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>
