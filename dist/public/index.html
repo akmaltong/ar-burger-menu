@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>The Big Burger AR</title>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; }
+      .controls {
+        position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
+        z-index: 100; display: flex; gap: 10px;
+      }
+      button {
+        padding: 15px 20px; font-size: 16px; border-radius: 12px; border: 2px solid #fff;
+        background: rgba(0,0,0,0.8); color: white; font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="controls">
+      <button onclick="resize(1.2)">Больше +</button>
+      <button onclick="resize(0.8)">Меньше -</button>
+    </div>
+
+    <a-scene 
+      embedded 
+      arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best; smooth: false;"
+      renderer="logarithmicDepthBuffer: true; antialias: true; precision: high; colorManagement: true;">
+
+      <a-marker preset="hiro" smooth="false">
+        
+        <a-entity light="type: ambient; intensity: 1.5;"></a-entity>
+        <a-entity light="type: directional; intensity: 1.5;" position="1 4 3"></a-entity>
+
+        <a-entity
+          id="mega-burger"
+          gltf-model="./models/glb/burger1.glb" 
+          scale="0.08 0.08 0.08" 
+          position="0 0 0"
+          rotation="0 0 0"
+          animation-mixer="timeScale: 0">
+        </a-entity>
+        
+      </a-marker>
+
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+      // Функция ручного изменения размера
+      function resize(factor) {
+        const el = document.querySelector('#mega-burger');
+        const s = el.getAttribute('scale');
+        el.setAttribute('scale', {x: s.x * factor, y: s.y * factor, z: s.z * factor});
+      }
+
+      // Принудительная остановка любой анимации
+      document.querySelector('#mega-burger').addEventListener('model-loaded', function () {
+        if (this.components['animation-mixer']) {
+          this.components['animation-mixer'].stop();
+        }
+        console.log("Модель загружена, анимация заблокирована");
+      });
+
+      // Старт камеры
+      window.addEventListener('touchstart', function () {
+        const v = document.querySelector('#arjs-video');
+        if (v) v.play();
+      });
+    </script>
+  </body>
+</html>
