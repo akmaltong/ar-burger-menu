@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Burger Mobile Access</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .qr-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            display: inline-block;
+        }
+        .links {
+            margin: 20px 0;
+        }
+        .link-button {
+            display: block;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            margin: 10px 0;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .link-button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        .instructions {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        h1 {
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍔 AR Бургер - Мобильный Доступ</h1>
+        
+        <div class="qr-container">
+            <h3>Отсканируйте QR код</h3>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://six-knives-draw.loca.lt/final-ar.html" alt="QR Code for AR Burger">
+        </div>
+        
+        <div class="links">
+            <a href="https://six-knives-draw.loca.lt/final-ar.html" class="link-button" target="_blank">
+                🌐 Открыть AR Бургер (HTTPS)
+            </a>
+            <a href="https://six-knives-draw.loca.lt/camera-diagnostics.html" class="link-button" target="_blank">
+                🔍 Диагностика Камеры
+            </a>
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 Инструкция:</h3>
+            <ol>
+                <li><strong>Отсканируйте QR код</strong> или нажмите на ссылку</li>
+                <li><strong>Разрешите доступ</strong> к камере когда браузер запросит</li>
+                <li><strong>Наведите камеру</strong> на маркер Hiro (гуглите "Hiro marker")</li>
+                <li><strong>Наслаждайтесь</strong> 3D уткой над маркером!</li>
+            </ol>
+            <p><strong>⚠️ Важно:</strong> Используйте Chrome, Edge или Firefox для лучшей совместимости</p>
+        </div>
+    </div>
+</body>
+</html>

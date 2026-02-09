@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Рабочий AR Бургер</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: Arial, sans-serif;
+        }
+        .loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 1000;
+        }
+        .loading.hidden {
+            display: none;
+        }
+        .error-message {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,0,0,0.8);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 1001;
+            max-width: 90%;
+        }
+        .error-message.hidden {
+            display: none;
+        }
+        .instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 14px;
+            max-width: 80%;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">
+        <h2>🍔 Загрузка AR Бургера</h2>
+        <p>Пожалуйста, подождите...</p>
+        <div id="loading-status">Инициализация...</div>
+    </div>
+    
+    <div id="error-message" class="error-message hidden">
+        <div id="error-text"></div>
+        <button onclick="retryAR()" style="margin-top: 10px; padding: 8px 16px; background: white; color: black; border: none; border-radius: 5px; cursor: pointer;">
+            Повторить попытку
+        </button>
+    </div>
+    
+    <div class="instructions">
+        Наведите камеру на маркер Hiro для отображения 3D бургера
+    </div>
+
+    <a-scene 
+        id="ar-scene"
+        embedded 
+        arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best;"
+        renderer="logarithmicDepthBuffer: true; antialias: true;"
+        vr-mode-ui="enabled: false">
+        
+        <a-marker id="hiro-marker" preset="hiro">
+            <a-entity light="type: ambient; intensity: 1.5;"></a-entity>
+            <a-entity light="type: directional; intensity: 1.5;" position="1 4 3"></a-entity>
+            
+            <a-entity
+                id="burger-model"
+                gltf-model="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/Duck/glTF/Duck.gltf"
+                scale="0.5 0.5 0.5"
+                position="0 0 0"
+                rotation="0 0 0">
+            </a-entity>
+        </a-marker>
+        
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+        let sceneLoaded = false;
+        let cameraStarted = false;
+        
+        function updateLoadingStatus(text) {
+            document.getElementById('loading-status').textContent = text;
+            console.log('[LOADING]', text);
+        }
+        
+        function showError(message) {
+            document.getElementById('error-text').textContent = message;
+            document.getElementById('error-message').classList.remove('hidden');
+            document.getElementById('loading').classList.add('hidden');
+            console.error('[ERROR]', message);
+        }
+        
+        function hideError() {
+            document.getElementById('error-message').classList.add('hidden');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').classList.add('hidden');
+        }
+        
+        // Проверка поддержки браузера
+        function checkBrowserSupport() {
+            updateLoadingStatus('Проверка поддержки браузера...');
+            
+            if (!navigator.mediaDevices) {
+                showError('Ваш браузер не поддерживает доступ к медиаустройствам. Попробуйте Chrome, Edge или Firefox.');
+                return false;
+            }
+            
+            if (!navigator.mediaDevices.getUserMedia) {
+                showError('Ваш браузер не поддерживает getUserMedia API.');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Автозапуск камеры
+        function setupCameraAutoStart() {
+            updateLoadingStatus('Настройка автозапуска камеры...');
+            
+            // Touch events для мобильных
+            document.addEventListener('touchstart', function startCameraTouch() {
+                if (!cameraStarted) {
+                    startCamera();
+                    document.removeEventListener('touchstart', startCameraTouch);
+                }
+            });
+            
+            // Click events для десктопа
+            document.addEventListener('click', function startCameraClick() {
+                if (!cameraStarted) {
+                    startCamera();
+                    document.removeEventListener('click', startCameraClick);
+                }
+            });
+            
+            // Для некоторых браузеров может сработать автоматически
+            setTimeout(startCamera, 2000);
+        }
+        
+        function startCamera() {
+            if (cameraStarted) return;
+            
+            updateLoadingStatus('Запуск камеры...');
+            
+            const video = document.querySelector('#arjs-video');
+            if (video) {
+                video.play()
+                    .then(() => {
+                        cameraStarted = true;
+                        updateLoadingStatus('Камера запущена!');
+                        console.log('[CAMERA] Started successfully');
+                    })
+                    .catch(err => {
+                        console.log('[CAMERA] Autoplay blocked:', err);
+                        updateLoadingStatus('Коснитесь экрана для запуска камеры');
+                    });
+            }
+        }
+        
+        // Обработка загрузки сцены
+        document.querySelector('#ar-scene').addEventListener('loaded', function() {
+            sceneLoaded = true;
+            updateLoadingStatus('Сцена загружена');
+            console.log('[SCENE] Loaded');
+        });
+        
+        // Обработка загрузки маркера
+        document.querySelector('#hiro-marker').addEventListener('markerFound', function() {
+            hideLoading();
+            hideError();
+            console.log('[MARKER] Found');
+        });
+        
+        document.querySelector('#hiro-marker').addEventListener('markerLost', function() {
+            console.log('[MARKER] Lost');
+        });
+        
+        // Обработка ошибок A-Frame
+        AFRAME.registerComponent('error-handler', {
+            init: function() {
+                this.el.addEventListener('componenterror', function(evt) {
+                    console.error('[AFRAME ERROR]', evt.detail);
+                });
+            }
+        });
+        
+        // Retry function
+        function retryAR() {
+            hideError();
+            document.getElementById('loading').classList.remove('hidden');
+            cameraStarted = false;
+            sceneLoaded = false;
+            
+            // Перезагрузка страницы как крайняя мера
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        }
+        
+        // Инициализация
+        window.addEventListener('load', function() {
+            console.log('[INIT] Starting AR Burger');
+            
+            if (!checkBrowserSupport()) {
+                return;
+            }
+            
+            setupCameraAutoStart();
+            
+            // Timeout если ничего не загружается
+            setTimeout(() => {
+                if (!sceneLoaded) {
+                    showError('Превышено время ожидания загрузки. Проверьте подключение к интернету.');
+                }
+            }, 15000);
+        });
+        
+        console.log('[APP] AR Burger initialized');
+    </script>
+</body>
+</html>

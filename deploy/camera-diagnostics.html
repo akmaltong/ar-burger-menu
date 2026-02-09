@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Камера Диагностика</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #2d2d2d;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #4CAF50; color: white; }
+        .error { background: #f44336; color: white; }
+        .warning { background: #ff9800; color: white; }
+        .info { background: #2196F3; color: white; }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 10px 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background: #45a049; }
+        button:disabled { background: #666; cursor: not-allowed; }
+        video {
+            width: 100%;
+            max-width: 500px;
+            border: 3px solid #4CAF50;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: none;
+        }
+        .log {
+            background: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            height: 200px;
+            overflow-y: auto;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔬 Диагностика Камеры Web AR</h1>
+        
+        <div class="test-section">
+            <h2>📊 Состояние системы</h2>
+            <div id="system-status"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🎮 Тесты</h2>
+            <button id="test-browser">Проверить браузер</button>
+            <button id="test-camera">Тест камеры</button>
+            <button id="test-webrtc">Проверить WebRTC</button>
+            <button id="test-all">Все тесты</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>📹 Камера</h2>
+            <video id="camera-preview" autoplay muted playsinline></video>
+            <div id="camera-status"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>📋 Логи</h2>
+            <div id="log" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        const systemStatus = document.getElementById('system-status');
+        const cameraPreview = document.getElementById('camera-preview');
+        const cameraStatus = document.getElementById('camera-status');
+        const logElement = document.getElementById('log');
+        
+        let stream = null;
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = `[${timestamp}] ${message}`;
+            logElement.innerHTML += entry + '<br>';
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(entry);
+        }
+        
+        function updateStatus(element, message, type) {
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        function testBrowserSupport() {
+            log('=== Проверка поддержки браузера ===');
+            
+            // HTTPS check
+            if (location.protocol === 'https:' || location.hostname === 'localhost') {
+                updateStatus(systemStatus, '✅ HTTPS/localhost: OK', 'success');
+                log('HTTPS/localhost: Поддерживается');
+            } else {
+                updateStatus(systemStatus, '❌ Требуется HTTPS для доступа к камере', 'error');
+                log('HTTPS: Не поддерживается (требуется для камеры)');
+            }
+            
+            // MediaDevices check
+            if (navigator.mediaDevices) {
+                log('MediaDevices: Доступен');
+                if (navigator.mediaDevices.getUserMedia) {
+                    log('getUserMedia: Поддерживается');
+                } else {
+                    log('getUserMedia: Не поддерживается');
+                }
+            } else {
+                log('MediaDevices: Не доступен');
+            }
+            
+            // WebRTC check
+            if (typeof RTCPeerConnection !== 'undefined') {
+                log('WebRTC: Поддерживается');
+            } else {
+                log('WebRTC: Не поддерживается');
+            }
+        }
+        
+        async function testCameraAccess() {
+            log('=== Тест доступа к камере ===');
+            
+            try {
+                updateStatus(cameraStatus, '🟡 Запрос доступа к камере...', 'warning');
+                log('Запрашиваю доступ к камере...');
+                
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                });
+                
+                log('✅ Камера подключена успешно');
+                log(`Доступные треки: ${stream.getVideoTracks().length} видео`);
+                
+                cameraPreview.srcObject = stream;
+                cameraPreview.style.display = 'block';
+                updateStatus(cameraStatus, '✅ Камера работает!', 'success');
+                
+                cameraPreview.onloadedmetadata = () => {
+                    log(`Разрешение камеры: ${cameraPreview.videoWidth}x${cameraPreview.videoHeight}`);
+                };
+                
+            } catch (error) {
+                log(`❌ Ошибка камеры: ${error.name} - ${error.message}`);
+                updateStatus(cameraStatus, `❌ Ошибка: ${error.message}`, 'error');
+                
+                // Подробные сообщения об ошибках
+                switch(error.name) {
+                    case 'NotAllowedError':
+                        log('💡 Разрешение: Откройте настройки браузера и разрешите доступ к камере');
+                        break;
+                    case 'NotFoundError':
+                        log('💡 Камера: Камера не найдена или занята другим приложением');
+                        break;
+                    case 'NotReadableError':
+                        log('💡 Камера: Камера занята или недоступна');
+                        break;
+                    case 'OverconstrainedError':
+                        log('💡 Настройки: Запрошенные параметры камеры недоступны');
+                        break;
+                    default:
+                        log(`💡 Неизвестная ошибка: ${error.name}`);
+                }
+            }
+        }
+        
+        function testWebRTC() {
+            log('=== Тест WebRTC ===');
+            
+            try {
+                const pc = new RTCPeerConnection();
+                log('✅ RTCPeerConnection создан');
+                pc.close();
+            } catch (error) {
+                log(`❌ WebRTC ошибка: ${error.message}`);
+            }
+        }
+        
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => {
+                    track.stop();
+                    log(`Остановлен трек: ${track.kind}`);
+                });
+                stream = null;
+            }
+            cameraPreview.style.display = 'none';
+            updateStatus(cameraStatus, '⏹ Камера остановлена', 'info');
+        }
+        
+        // Event listeners
+        document.getElementById('test-browser').onclick = testBrowserSupport;
+        document.getElementById('test-camera').onclick = testCameraAccess;
+        document.getElementById('test-webrtc').onclick = testWebRTC;
+        document.getElementById('test-all').onclick = function() {
+            testBrowserSupport();
+            setTimeout(testWebRTC, 500);
+            setTimeout(testCameraAccess, 1000);
+        };
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', stopCamera);
+        
+        // Auto-test on load
+        window.addEventListener('load', function() {
+            log('🚀 Диагностика загружена');
+            testBrowserSupport();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Browser Compatibility Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+        .test-result { margin: 10px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+        .error { background: #ffebee; color: #c62828; }
+        .warning { background: #fff3e0; color: #ef6c00; }
+        button { padding: 10px 20px; margin: 10px 5px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Browser Compatibility Test</h1>
+    
+    <div id="results"></div>
+    
+    <button onclick="testAll()">Run All Tests</button>
+    <button onclick="testCamera()">Test Camera Access</button>
+    
+    <div id="log" style="margin-top: 20px; font-family: monospace;"></div>
+
+    <script>
+        const results = document.getElementById('results');
+        const log = document.getElementById('log');
+        
+        function addLog(msg) {
+            log.innerHTML += `${new Date().toLocaleTimeString()}: ${msg}<br>`;
+            log.scrollTop = log.scrollHeight;
+            console.log(msg);
+        }
+        
+        function addResult(title, status, message) {
+            const div = document.createElement('div');
+            div.className = `test-result ${status.toLowerCase()}`;
+            div.innerHTML = `<strong>${title}:</strong> ${message}`;
+            results.appendChild(div);
+        }
+        
+        function testAll() {
+            results.innerHTML = '';
+            log.innerHTML = '';
+            
+            // Test HTTPS
+            if (location.protocol === 'https:') {
+                addResult('HTTPS', 'SUCCESS', 'Using secure connection');
+            } else {
+                addResult('HTTPS', 'WARNING', 'Not using HTTPS - may affect camera access');
+            }
+            
+            // Test WebRTC
+            if (typeof RTCPeerConnection !== 'undefined') {
+                addResult('WebRTC', 'SUCCESS', 'RTCPeerConnection supported');
+            } else {
+                addResult('WebRTC', 'ERROR', 'RTCPeerConnection not supported');
+            }
+            
+            // Test MediaDevices
+            if (navigator.mediaDevices) {
+                addResult('MediaDevices', 'SUCCESS', 'navigator.mediaDevices available');
+                
+                // Test getUserMedia
+                if (navigator.mediaDevices.getUserMedia) {
+                    addResult('getUserMedia', 'SUCCESS', 'getUserMedia method available');
+                } else {
+                    addResult('getUserMedia', 'ERROR', 'getUserMedia method not available');
+                }
+            } else {
+                addResult('MediaDevices', 'ERROR', 'navigator.mediaDevices not available');
+            }
+            
+            // Test A-Frame support
+            if (typeof AFRAME !== 'undefined') {
+                addResult('A-Frame', 'SUCCESS', `Version ${AFRAME.version} loaded`);
+            } else {
+                addResult('A-Frame', 'WARNING', 'A-Frame not loaded yet');
+            }
+            
+            addLog('All tests completed');
+        }
+        
+        async function testCamera() {
+            try {
+                addLog('Requesting camera access...');
+                const stream = await navigator.mediaDevices.getUserMedia({video: true});
+                addLog('Camera access granted!');
+                addResult('Camera Test', 'SUCCESS', 'Camera access working');
+                
+                // Stop tracks to release camera
+                stream.getTracks().forEach(track => track.stop());
+                addLog('Camera released');
+            } catch (err) {
+                addLog(`Camera error: ${err.name} - ${err.message}`);
+                addResult('Camera Test', 'ERROR', `${err.name}: ${err.message}`);
+            }
+        }
+        
+        // Auto-run tests on load
+        window.addEventListener('load', testAll);
+    </script>
+</body>
+</html>
