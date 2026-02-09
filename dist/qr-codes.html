@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Меню Бургеров - QR-коды</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #ff6b6b;
+            margin-bottom: 30px;
+        }
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        .qr-item {
+            text-align: center;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+        }
+        .qr-item h3 {
+            margin: 15px 0 5px 0;
+            color: #333;
+        }
+        .qr-item p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 10px auto;
+            border: 1px solid #eee;
+            padding: 10px;
+            background: white;
+        }
+        .instructions {
+            background: #e8f4fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .instructions h2 {
+            color: #2c5282;
+            margin-top: 0;
+        }
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍔 AR Меню Бургеров - QR-коды</h1>
+        
+        <div class="instructions">
+            <h2>Инструкции по использованию</h2>
+            <ol>
+                <li>Вырежьте эти QR-коды и разместите их рядом с соответствующими пунктами меню</li>
+                <li>Клиенты сканируют QR-коды с помощью камер своих телефонов</li>
+                <li>3D модели бургеров появятся в дополненной реальности</li>
+                <li>Печатайте в черно-белом цвете для лучшего результата сканирования</li>
+            </ol>
+        </div>
+
+        <div class="qr-grid">
+            <div class="qr-item">
+                <h3>Классический Бургер</h3>
+                <p>Традиционная говядина с салатом и помидором</p>
+                <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=burger_001" alt="QR-код для Классического Бургера">
+                <div>QR-код: burger_001</div>
+            </div>
+            
+            <div class="qr-item">
+                <h3>Чизбургер</h3>
+                <p>Сочная говяжья котлета с плавленным сыром чеддер</p>
+                <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=burger_002" alt="QR-код для Чизбургера">
+                <div>QR-код: burger_002</div>
+            </div>
+            
+            <div class="qr-item">
+                <h3>Бекон Делюкс</h3>
+                <p>Премиум бургер с хрустящим беконом и карамелизированным луком</p>
+                <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=burger_003" alt="QR-код для Бекон Делюкса">
+                <div>QR-код: burger_003</div>
+            </div>
+            
+            <div class="qr-item">
+                <h3>Вегги Суприм</h3>
+                <p>Растительная котлета со свежими овощами</p>
+                <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=burger_004" alt="QR-код для Вегги Суприма">
+                <div>QR-код: burger_004</div>
+            </div>
+            
+            <div class="qr-item">
+                <h3>Двойная Порция</h3>
+                <p>Две говяжьи котлеты с двойным сыром</p>
+                <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=burger_005" alt="QR-код для Двойной Порции">
+                <div>QR-код: burger_005</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
