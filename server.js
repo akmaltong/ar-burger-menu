@@ -87,11 +87,13 @@ const pems = selfsigned.generate(attrs, {
   days: 365,
   keySize: 2048,
   extensions: [
-    { name: 'subjectAltName', altNames: [
-      { type: 2, value: 'localhost' },
-      { type: 7, ip: '127.0.0.1' },
-      { type: 7, ip: localIP },
-    ]}
+    {
+      name: 'subjectAltName', altNames: [
+        { type: 2, value: 'localhost' },
+        { type: 7, ip: '127.0.0.1' },
+        { type: 7, ip: localIP },
+      ]
+    }
   ]
 });
 
@@ -125,7 +127,7 @@ httpsServer.listen(PORT_HTTPS, '0.0.0.0', () => {
   console.log('Then allow camera access when prompted. - server.js:125');
   console.log('Point camera at a HIRO marker to see the burger! - server.js:126');
   console.log('');
-  console.log('HIRO marker: https://raw.githubusercontent.com/ARjsorg/AR.js/master/data/images/hiro.png - server.js:128');
+  console.log('HIRO marker: https:// - server.js:128' + localIP + ':' + PORT_HTTPS + '/hiro-marker.html');
   console.log('');
   console.log('Press Ctrl+C to stop - server.js:130');
 });

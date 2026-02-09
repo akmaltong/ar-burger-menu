@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест сервера</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+
+        .info {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🧪 Тест сервера AR Бургера</h1>
+
+    <div class="info">
+        <h2>Информация о соединении</h2>
+        <p><strong>URL:</strong> <span id="url"></span></p>
+        <p><strong>Протокол:</strong> <span id="protocol"></span></p>
+        <p><strong>Хост:</strong> <span id="host"></span></p>
+        <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+    </div>
+
+    <div class="info">
+        <h2>Проверка файлов</h2>
+        <p>index.html: <span id="index-check">Проверка...</span></p>
+        <p>burger1.glb: <span id="model-check">Проверка...</span></p>
+    </div>
+
+    <div class="info">
+        <h2>Проверка камеры</h2>
+        <p id="camera-status">Не проверено</p>
+        <button onclick="checkCamera()">Проверить камеру</button>
+    </div>
+
+    <div class="info">
+        <h2>Действия</h2>
+        <button onclick="location.href='/'">Открыть AR Бургер</button>
+        <button onclick="location.href='/qr-generator.html'">Генератор QR</button>
+    </div>
+
+    <script>
+        // Отображение информации о соединении
+        document.getElementById('url').textContent = window.location.href;
+        document.getElementById('protocol').textContent = window.location.protocol;
+        document.getElementById('host').textContent = window.location.host;
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+
+        // Проверка файлов
+        async function checkFiles() {
+            try {
+                const indexResponse = await fetch('/');
+                document.getElementById('index-check').innerHTML =
+                    indexResponse.ok ? '<span class="success">✓ OK</span>' : '<span class="error">✗ Ошибка</span>';
+            } catch (e) {
+                document.getElementById('index-check').innerHTML = '<span class="error">✗ Ошибка: ' + e.message + '</span>';
+            }
+
+            try {
+                const modelResponse = await fetch('/models/glb/burger1.glb');
+                document.getElementById('model-check').innerHTML =
+                    modelResponse.ok ? '<span class="success">✓ OK</span>' : '<span class="error">✗ Ошибка</span>';
+            } catch (e) {
+                document.getElementById('model-check').innerHTML = '<span class="error">✗ Ошибка: ' + e.message + '</span>';
+            }
+        }
+
+        // Проверка камеры
+        async function checkCamera() {
+            const statusEl = document.getElementById('camera-status');
+            statusEl.textContent = 'Проверка...';
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                statusEl.innerHTML = '<span class="error">✗ getUserMedia не поддерживается</span>';
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                statusEl.innerHTML = '<span class="success">✓ Камера доступна!</span>';
+                stream.getTracks().forEach(track => track.stop());
+            } catch (e) {
+                statusEl.innerHTML = '<span class="error">✗ Ошибка: ' + e.name + ' - ' + e.message + '</span>';
+            }
+        }
+
+        // Запуск проверок
+        checkFiles();
+    </script>
+</body>
+
+</html>

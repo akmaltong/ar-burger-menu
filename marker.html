@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Скачать маркер AR</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        .marker-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+
+        .marker-image {
+            max-width: 300px;
+            display: block;
+            margin: 20px auto;
+            border: 2px solid #333;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 18px;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        .download-btn:hover {
+            background: #0056b3;
+        }
+
+        .instructions {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: #856404;
+        }
+
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin: 8px 0;
+        }
+
+        .note {
+            background: #d1ecf1;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .note strong {
+            color: #0c5460;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .container {
+                box-shadow: none;
+            }
+
+            .download-btn,
+            .instructions,
+            .note {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>📷 Маркер для AR Бургера</h1>
+
+        <div class="instructions">
+            <h3>📋 Инструкция:</h3>
+            <ol>
+                <li>Нажмите кнопку "Скачать маркер" ниже</li>
+                <li>Распечатайте маркер на принтере (A4 или Letter)</li>
+                <li>Положите маркер на ровную поверхность</li>
+                <li>Откройте AR приложение на телефоне</li>
+                <li>Наведите камеру на маркер</li>
+                <li>Бургер появится! 🍔</li>
+            </ol>
+        </div>
+
+        <div class="marker-section">
+            <h2 style="text-align: center;">Barcode Value = 6</h2>
+            <p style="text-align: center;">Это маркер, который использует AR приложение</p>
+
+            <canvas id="markerCanvas" width="400" height="400" class="marker-image"></canvas>
+
+            <div style="text-align: center;">
+                <button onclick="downloadMarker()" class="download-btn">
+                    📥 Скачать маркер
+                </button>
+                <button onclick="window.print()" class="download-btn">
+                    🖨️ Распечатать
+                </button>
+            </div>
+        </div>
+
+        <div class="note">
+            <strong>💡 Совет:</strong> Для лучшего результата:
+            <ul>
+                <li>Печатайте на белой бумаге</li>
+                <li>Убедитесь, что маркер ровный и не смят</li>
+                <li>Используйте хорошее освещение</li>
+                <li>Держите телефон на расстоянии 20-30 см от маркера</li>
+            </ul>
+        </div>
+
+        <div class="marker-section">
+            <h3>🔗 Прямая ссылка на маркер:</h3>
+            <p
+                style="word-break: break-all; font-family: monospace; background: #f0f0f0; padding: 10px; border-radius: 4px;">
+                https://raw.githubusercontent.com/ARjsorg/AR.js/master/data/images/barcode-6.png
+            </p>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/" class="download-btn" style="background: #28a745;">
+                🍔 Вернуться к AR Бургеру
+            </a>
+            <a href="/test.html" class="download-btn" style="background: #6c757d;">
+                🧪 Тест сервера
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Generate barcode marker for value 6
+        function generateBarcodeMarker() {
+            const canvas = document.getElementById('markerCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Barcode pattern for value 6 (3x3 matrix)
+            const padding = 20;
+            const markerSize = canvas.width - (padding * 2);
+            const cellSize = markerSize / 3;
+
+            // Draw border
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 10;
+            ctx.strokeRect(padding, padding, markerSize, markerSize);
+
+            // Barcode pattern for value 6
+            // This is a simplified representation of a 3x3 barcode marker
+            const pattern = [
+                [1, 0, 1],
+                [0, 1, 0],
+                [1, 0, 1]
+            ];
+
+            // Draw the pattern
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 3; col++) {
+                    const x = padding + col * cellSize;
+                    const y = padding + row * cellSize;
+
+                    if (pattern[row][col] === 1) {
+                        ctx.fillStyle = 'black';
+                        ctx.fillRect(x, y, cellSize, cellSize);
+                    } else {
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(x, y, cellSize, cellSize);
+                    }
+                }
+            }
+
+            // Add label
+            ctx.fillStyle = 'black';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Barcode Value = 6', canvas.width / 2, canvas.height - 10);
+        }
+
+        // Download marker as PNG
+        function downloadMarker() {
+            const canvas = document.getElementById('markerCanvas');
+            const link = document.createElement('a');
+            link.download = 'barcode-6-marker.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Generate marker on page load
+        window.onload = function () {
+            generateBarcodeMarker();
+            console.log('Barcode marker generated successfully');
+        };
+    </script>
+</body>
+
+</html>
