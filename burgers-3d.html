@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Все Бургеры - 3D Просмотр</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        .burger-info {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .burger-info h1 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .burger-info p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .burger-info button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 0;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .burger-info button:hover {
+            background: #0056b3;
+        }
+
+        .burger-info button.active {
+            background: #28a745;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff9900;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-btn:hover {
+            background: #e68a00;
+        }
+
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            font-size: 24px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+
+<body style="margin: 0; overflow: hidden;">
+    <div class="loading" id="loading">Загрузка бургеров... 🍔🍔🍔🍔</div>
+
+    <!-- Burger selection panel -->
+    <div class="burger-info">
+        <h1>🍔 Выберите бургер</h1>
+        <p>Нажмите на кнопку, чтобы увидеть бургер</p>
+        <button onclick="showBurger(1)" id="btn-1">🍔 Бургер 1</button>
+        <button onclick="showBurger(2)" id="btn-2">🍔 Бургер 2</button>
+        <button onclick="showBurger(3)" id="btn-3">🍔 Бургер 3</button>
+        <button onclick="showBurger(4)" id="btn-4">🍔 Бургер 4</button>
+        <p style="margin-top: 20px; font-size: 12px; color: #999;">
+            Используйте мышь для вращения и масштабирования
+        </p>
+    </div>
+
+    <a href="/" class="back-btn">← Вернуться</a>
+
+    <a-scene embedded>
+        <a-assets>
+            <a-asset-item id="burger1-model" src="models/glb/burger1.glb"></a-asset-item>
+            <a-asset-item id="burger2-model" src="models/glb/burger2.glb"></a-asset-item>
+            <a-asset-item id="burger3-model" src="models/glb/burger3.glb"></a-asset-item>
+            <a-asset-item id="burger4-model" src="models/glb/burger4.glb"></a-asset-item>
+        </a-assets>
+
+        <!-- Burger 1 -->
+        <a-entity id="burger-1" gltf-model="#burger1-model" scale="0.15 0.15 0.15" position="0 0 -3" rotation="-90 0 0"
+            animation="property: rotation; to: -90 360 0; loop: true; dur: 10000; easing: linear" visible="false">
+        </a-entity>
+
+        <!-- Burger 2 -->
+        <a-entity id="burger-2" gltf-model="#burger2-model" scale="0.15 0.15 0.15" position="0 0 -3" rotation="-90 0 0"
+            animation="property: rotation; to: -90 360 0; loop: true; dur: 10000; easing: linear" visible="false">
+        </a-entity>
+
+        <!-- Burger 3 -->
+        <a-entity id="burger-3" gltf-model="#burger3-model" scale="0.15 0.15 0.15" position="0 0 -3" rotation="-90 0 0"
+            animation="property: rotation; to: -90 360 0; loop: true; dur: 10000; easing: linear" visible="false">
+        </a-entity>
+
+        <!-- Burger 4 -->
+        <a-entity id="burger-4" gltf-model="#burger4-model" scale="0.15 0.15 0.15" position="0 0 -3" rotation="-90 0 0"
+            animation="property: rotation; to: -90 360 0; loop: true; dur: 10000; easing: linear" visible="false">
+        </a-entity>
+
+        <a-entity camera look-controls wasd-controls></a-entity>
+    </a-scene>
+
+    <script>
+        let currentBurger = null;
+
+        function showBurger(burgerNum) {
+            // Hide all burgers
+            for (let i = 1; i <= 4; i++) {
+                const burger = document.getElementById(`burger-${i}`);
+                const btn = document.getElementById(`btn-${i}`);
+                if (burger) {
+                    burger.setAttribute('visible', 'false');
+                }
+                if (btn) {
+                    btn.classList.remove('active');
+                }
+            }
+
+            // Show selected burger
+            const selectedBurger = document.getElementById(`burger-${burgerNum}`);
+            const selectedBtn = document.getElementById(`btn-${burgerNum}`);
+            if (selectedBurger) {
+                selectedBurger.setAttribute('visible', 'true');
+                currentBurger = burgerNum;
+            }
+            if (selectedBtn) {
+                selectedBtn.classList.add('active');
+            }
+
+            // Hide loading
+            const loader = document.getElementById('loading');
+            if (loader) {
+                loader.style.display = 'none';
+            }
+        }
+
+        // Hide loading when scene is ready
+        document.querySelector('a-scene').addEventListener('loaded', function () {
+            const loader = document.getElementById('loading');
+            if (loader) {
+                loader.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>
