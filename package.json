@@ -1,0 +1,13 @@
+{
+    "name": "burger-ar-menu",
+    "version": "1.0.0",
+    "description": "AR Burger Menu with QR code scanning",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "download-marker": "node download-marker.js"
+    },
+    "dependencies": {
+        "selfsigned": "^2.4.1"
+    }
+}

@@ -1,0 +1,11 @@
+﻿AR MENU SETUP GUIDE
+
+1. GENERATE MARKERS:
+   https://jeromeetienne.github.io/AR.js/three.js/examples/marker-training/examples/generator.html
+
+2. REPLACE FILES:
+   - Markers: C:\Users\akmal\Desktop\burger-ar-menu\js\markers\
+   - Models:  C:\Users\akmal\Desktop\burger-ar-menu\models\gltf\
+
+3. TEST:
+   Upload folder to https://app.netlify.com/drop -> open link on phone

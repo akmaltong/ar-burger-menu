@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR-код для AR Меню Бургеров</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 500px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #ff9900;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #e68a00;
+        }
+
+        #qrcode {
+            margin: 30px auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        #qrcode img {
+            border: 5px solid #333;
+            border-radius: 10px;
+        }
+
+        .instructions {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin: 8px 0;
+            color: #555;
+        }
+
+        .marker-info {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .marker-info h4 {
+            margin: 0 0 10px 0;
+            color: #856404;
+        }
+
+        .marker-info p {
+            margin: 5px 0;
+            color: #856404;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🍔 AR Меню Бургеров</h1>
+        <p class="subtitle">Генератор QR-кода для стола</p>
+
+        <div class="input-group">
+            <input type="text" id="urlInput" placeholder="https://192.168.1.100:8443" value="">
+        </div>
+
+        <button onclick="generateQR()">Сгенерировать QR-код</button>
+        <button onclick="printQR()">🖨️ Печать</button>
+
+        <div id="qrcode"></div>
+
+        <div class="instructions">
+            <h3>📋 Инструкция:</h3>
+            <ol>
+                <li>Запустите сервер: <code>npm start</code></li>
+                <li>Скопируйте HTTPS URL из консоли</li>
+                <li>Вставьте URL в поле выше</li>
+                <li>Нажмите "Сгенерировать QR-код"</li>
+                <li>Распечатайте QR-код и положите на стол</li>
+                <li>Гости сканируют QR-код камерой телефона</li>
+                <li>Разрешают доступ к камере</li>
+                <li>Наводят камеру на QR-код (value=6) для просмотра бургера!</li>
+            </ol>
+        </div>
+
+        <div class="marker-info">
+            <h4>⚠️ Важно о маркере:</h4>
+            <p>QR-код на столе должен быть типа <strong>Barcode value=6</strong></p>
+            <p>Скачайте готовый маркер: <a
+                    href="https://raw.githubusercontent.com/ARjsorg/AR.js/master/data/images/barcode-6.png"
+                    target="_blank">barcode-6.png</a></p>
+            <p>Или создайте свой на: <a
+                    href="https://jeromeetienne.github.io/AR.js/three.js/examples/marker-training/examples/generator.html"
+                    target="_blank">AR.js Marker Generator</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Auto-detect local IP
+        function getLocalIP() {
+            return new Promise((resolve) => {
+                const RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
+                if (!RTCPeerConnection) {
+                    resolve('192.168.1.100');
+                    return;
+                }
+                const pc = new RTCPeerConnection({ iceServers: [] });
+                pc.createDataChannel('');
+                pc.createOffer().then(offer => pc.setLocalDescription(offer));
+                pc.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        const match = event.candidate.candidate.match(/(\d+\.\d+\.\d+\.\d+)/);
+                        if (match && !match[1].startsWith('127.')) {
+                            pc.close();
+                            resolve(match[1]);
+                        }
+                    }
+                };
+                setTimeout(() => {
+                    pc.close();
+                    resolve('192.168.1.100');
+                }, 1000);
+            });
+        }
+
+        // Initialize with local IP
+        getLocalIP().then(ip => {
+            document.getElementById('urlInput').value = `https://${ip}:8443`;
+            generateQR();
+        });
+
+        function generateQR() {
+            const url = document.getElementById('urlInput').value.trim();
+            if (!url) {
+                alert('Пожалуйста, введите URL');
+                return;
+            }
+
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+
+            new QRCode(qrContainer, {
+                text: url,
+                width: 256,
+                height: 256,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function printQR() {
+            const qrContainer = document.getElementById('qrcode');
+            if (!qrContainer.querySelector('img')) {
+                alert('Сначала сгенерируйте QR-код');
+                return;
+            }
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>QR-код для AR Меню</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              text-align: center;
+              padding: 20px;
+            }
+            h1 {
+              color: #333;
+            }
+            .qr-container {
+              margin: 30px auto;
+              display: inline-block;
+            }
+            .instructions {
+              background: #f5f5f5;
+              padding: 20px;
+              border-radius: 10px;
+              margin-top: 20px;
+              text-align: left;
+              max-width: 600px;
+              margin-left: auto;
+              margin-right: auto;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>🍔 AR Меню Бургеров</h1>
+          <p>Отсканируйте этот QR-код камерой телефона</p>
+          <div class="qr-container">
+            ${qrContainer.innerHTML}
+          </div>
+          <div class="instructions">
+            <h3>Инструкция:</h3>
+            <ol>
+              <li>Откройте камеру телефона</li>
+              <li>Наведите на этот QR-код</li>
+              <li>Перейдите по ссылке</li>
+              <li>Разрешите доступ к камере</li>
+              <li>Наведите камеру на маркер (Barcode value=6)</li>
+              <li>Наслаждайтесь 3D бургером! 🍔</li>
+            </ol>
+          </div>
+        </body>
+        </html>
+      `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+    </script>
+</body>
+
+</html>
