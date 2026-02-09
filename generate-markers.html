@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Все маркеры для AR Бургеров</title>
+    <title>Генератор маркеров для AR Бургеров</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -46,7 +46,7 @@
             margin-top: 0;
         }
 
-        .marker-svg {
+        canvas {
             max-width: 200px;
             display: block;
             margin: 20px auto;
@@ -70,7 +70,7 @@
             background: #0056b3;
         }
 
-        .print-all-btn {
+        .download-all-btn {
             background: #28a745;
             display: block;
             margin: 30px auto;
@@ -78,7 +78,7 @@
             font-size: 18px;
         }
 
-        .print-all-btn:hover {
+        .download-all-btn:hover {
             background: #218838;
         }
 
@@ -114,12 +114,12 @@
             }
 
             .download-btn,
-            .print-all-btn,
+            .download-all-btn,
             .instructions {
                 display: none;
             }
 
-            .marker-svg {
+            canvas {
                 border: 3px solid #000;
             }
         }
@@ -128,12 +128,13 @@
 
 <body>
     <div class="container">
-        <h1>📷 Все маркеры для AR Бургеров</h1>
+        <h1>📷 Генератор маркеров для AR Бургеров</h1>
 
         <div class="instructions">
             <h3>📋 Инструкция:</h3>
             <ol>
-                <li>Распечатайте все маркеры ниже</li>
+                <li>Нажмите "Скачать все маркеры" ниже</li>
+                <li>Распечатайте маркеры</li>
                 <li>Положите маркеры на стол</li>
                 <li>Откройте AR приложение</li>
                 <li>Наведите камеру на любой маркер</li>
@@ -141,43 +142,18 @@
             </ol>
         </div>
 
-        <button onclick="window.print()" class="download-btn print-all-btn">
-            🖨️ Распечатать все маркеры
+        <button onclick="downloadAllMarkers()" class="download-btn download-all-btn">
+            📥 Скачать все маркеры
         </button>
 
         <div class="markers-grid">
-            <!-- HIRO Marker - Burger 1 -->
-            <div class="marker-card">
-                <h2>🍔 Бургер 1</h2>
-                <p><strong>Маркер:</strong> HIRO</p>
-                <svg class="marker-svg" width="200" height="200" viewBox="0 0 200 200">
-                    <rect x="0" y="0" width="200" height="200" fill="white" />
-                    <rect x="10" y="10" width="180" height="180" fill="none" stroke="black" stroke-width="20" />
-                    <rect x="30" y="30" width="140" height="140" fill="none" stroke="black" stroke-width="5" />
-                    <text x="100" y="100" font-size="80" font-weight="bold" text-anchor="middle"
-                        fill="black">HIRO</text>
-                    <text x="100" y="180" font-size="16" text-anchor="middle" fill="black">Marker HIRO</text>
-                </svg>
-                <div>
-                    <a href="/hiro.png" download="hiro-marker.png" class="download-btn">
-                        📥 Скачать
-                    </a>
-                </div>
-            </div>
-
             <!-- A Marker - Burger 2 -->
             <div class="marker-card">
                 <h2>🍔 Бургер 2</h2>
                 <p><strong>Маркер:</strong> A</p>
-                <svg class="marker-svg" width="200" height="200" viewBox="0 0 200 200">
-                    <rect x="0" y="0" width="200" height="200" fill="white" />
-                    <rect x="10" y="10" width="180" height="180" fill="none" stroke="black" stroke-width="20" />
-                    <rect x="30" y="30" width="140" height="140" fill="none" stroke="black" stroke-width="5" />
-                    <text x="100" y="100" font-size="80" font-weight="bold" text-anchor="middle" fill="black">A</text>
-                    <text x="100" y="180" font-size="16" text-anchor="middle" fill="black">Marker A</text>
-                </svg>
+                <canvas id="canvas-a" width="400" height="400"></canvas>
                 <div>
-                    <button onclick="downloadSVG('a')" class="download-btn">
+                    <button onclick="downloadMarker('a')" class="download-btn">
                         📥 Скачать
                     </button>
                 </div>
@@ -187,15 +163,9 @@
             <div class="marker-card">
                 <h2>🍔 Бургер 3</h2>
                 <p><strong>Маркер:</strong> B</p>
-                <svg class="marker-svg" width="200" height="200" viewBox="0 0 200 200">
-                    <rect x="0" y="0" width="200" height="200" fill="white" />
-                    <rect x="10" y="10" width="180" height="180" fill="none" stroke="black" stroke-width="20" />
-                    <rect x="30" y="30" width="140" height="140" fill="none" stroke="black" stroke-width="5" />
-                    <text x="100" y="100" font-size="80" font-weight="bold" text-anchor="middle" fill="black">B</text>
-                    <text x="100" y="180" font-size="16" text-anchor="middle" fill="black">Marker B</text>
-                </svg>
+                <canvas id="canvas-b" width="400" height="400"></canvas>
                 <div>
-                    <button onclick="downloadSVG('b')" class="download-btn">
+                    <button onclick="downloadMarker('b')" class="download-btn">
                         📥 Скачать
                     </button>
                 </div>
@@ -205,15 +175,9 @@
             <div class="marker-card">
                 <h2>🍔 Бургер 4</h2>
                 <p><strong>Маркер:</strong> C</p>
-                <svg class="marker-svg" width="200" height="200" viewBox="0 0 200 200">
-                    <rect x="0" y="0" width="200" height="200" fill="white" />
-                    <rect x="10" y="10" width="180" height="180" fill="none" stroke="black" stroke-width="20" />
-                    <rect x="30" y="30" width="140" height="140" fill="none" stroke="black" stroke-width="5" />
-                    <text x="100" y="100" font-size="80" font-weight="bold" text-anchor="middle" fill="black">C</text>
-                    <text x="100" y="180" font-size="16" text-anchor="middle" fill="black">Marker C</text>
-                </svg>
+                <canvas id="canvas-c" width="400" height="400"></canvas>
                 <div>
-                    <button onclick="downloadSVG('c')" class="download-btn">
+                    <button onclick="downloadMarker('c')" class="download-btn">
                         📥 Скачать
                     </button>
                 </div>
@@ -224,23 +188,65 @@
             <a href="/" class="download-btn" style="background: #28a745;">
                 🍔 Вернуться к AR Бургеру
             </a>
-            <a href="/generate-markers.html" class="download-btn" style="background: #6c757d;">
-                📷 Генератор маркеров
+            <a href="/all-markers.html" class="download-btn" style="background: #6c757d;">
+                📷 Все маркеры
             </a>
         </div>
     </div>
 
     <script>
-        function downloadSVG(letter) {
-            const svg = document.querySelector(`.marker-card:nth-child(${letter === 'a' ? 2 : letter === 'b' ? 3 : 4}) svg`);
-            const svgData = new XMLSerializer().serializeToString(svg);
-            const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
+        // Generate markers on page load
+        window.onload = function () {
+            generateMarker('a', 'A');
+            generateMarker('b', 'B');
+            generateMarker('c', 'C');
+        };
+
+        function generateMarker(id, letter) {
+            const canvas = document.getElementById('canvas-' + id);
+            const ctx = canvas.getContext('2d');
+            const size = 400;
+
+            // White background
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, size, size);
+
+            // Black border
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 20;
+            ctx.strokeRect(10, 10, size - 20, size - 20);
+
+            // Inner border
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 5;
+            ctx.strokeRect(30, 30, size - 60, size - 60);
+
+            // Letter in center
+            ctx.fillStyle = 'black';
+            ctx.font = 'bold 200px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(letter, size / 2, size / 2);
+
+            // Label at bottom
+            ctx.fillStyle = 'black';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`Marker ${letter}`, size / 2, size - 20);
+        }
+
+        function downloadMarker(id) {
+            const canvas = document.getElementById('canvas-' + id);
             const link = document.createElement('a');
-            link.download = `${letter}-marker.svg`;
-            link.href = url;
+            link.download = `${id}-marker.png`;
+            link.href = canvas.toDataURL('image/png');
             link.click();
-            URL.revokeObjectURL(url);
+        }
+
+        function downloadAllMarkers() {
+            downloadMarker('a');
+            setTimeout(() => downloadMarker('b'), 500);
+            setTimeout(() => downloadMarker('c'), 1000);
         }
     </script>
 </body>
