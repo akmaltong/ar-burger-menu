@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Минимальный тест камеры</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            margin: 0;
+            background: #000;
+            color: white;
+        }
+        .container {
+            max-width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        video {
+            width: 90%;
+            max-width: 500px;
+            border: 3px solid #ff6b6b;
+            border-radius: 10px;
+            background: #333;
+        }
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #ff5252;
+            transform: scale(1.05);
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .status {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 18px;
+            max-width: 90%;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎥 Тест камеры AR Burger</h1>
+        
+        <div id="status" class="status info">
+            Нажмите кнопку ниже для запуска камеры
+        </div>
+        
+        <video id="cameraFeed" autoplay playsinline muted class="hidden"></video>
+        
+        <div class="controls">
+            <button id="startCamera">🔴 ЗАПУСТИТЬ КАМЕРУ</button>
+            <button id="stopCamera" disabled>⏹ ОСТАНОВИТЬ</button>
+        </div>
+        
+        <div id="debug" style="margin-top: 20px; font-family: monospace; font-size: 14px; color: #aaa;"></div>
+    </div>
+
+    <script>
+        const cameraFeed = document.getElementById('cameraFeed');
+        const startBtn = document.getElementById('startCamera');
+        const stopBtn = document.getElementById('stopCamera');
+        const status = document.getElementById('status');
+        const debug = document.getElementById('debug');
+        let stream = null;
+
+        function log(message) {
+            const time = new Date().toLocaleTimeString();
+            debug.innerHTML += `[${time}] ${message}<br>`;
+            debug.scrollTop = debug.scrollHeight;
+            console.log(message);
+        }
+
+        function updateStatus(text, type = 'info') {
+            status.textContent = text;
+            status.className = `status ${type}`;
+        }
+
+        async function initializeCamera() {
+            try {
+                log('Запрос разрешения на доступ к камере...');
+                updateStatus('Запрашиваю доступ к камере...', 'info');
+
+                // Конstrainst для мобильных устройств
+                const constraints = {
+                    video: {
+                        facingMode: { exact: "environment" }, // задняя камера
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                };
+
+                log('Попытка получения медиа потока...');
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                log('Медиа поток получен успешно');
+                log(`Доступные треки: ${stream.getVideoTracks().length} видео, ${stream.getAudioTracks().length} аудио`);
+
+                // Настройка видео элемента
+                cameraFeed.srcObject = stream;
+                
+                cameraFeed.onloadedmetadata = function(e) {
+                    log(`Видео метаданные загружены: ${cameraFeed.videoWidth}x${cameraFeed.videoHeight}`);
+                    updateStatus('Камера готова! ✅', 'success');
+                    
+                    // Автоматическое воспроизведение
+                    cameraFeed.play()
+                        .then(() => {
+                            log('Видео начало воспроизводиться');
+                            cameraFeed.classList.remove('hidden');
+                            startBtn.disabled = true;
+                            stopBtn.disabled = false;
+                        })
+                        .catch(err => {
+                            log(`Ошибка воспроизведения: ${err.message}`);
+                            updateStatus(`Ошибка воспроизведения: ${err.message}`, 'error');
+                        });
+                };
+
+                cameraFeed.onerror = function(e) {
+                    log(`Ошибка видео: ${e.target.error.message}`);
+                    updateStatus(`Ошибка видео: ${e.target.error.message}`, 'error');
+                };
+
+            } catch (error) {
+                log(`Критическая ошибка: ${error.name} - ${error.message}`);
+                
+                // Попытка с другими настройками
+                if (error.name === 'OverconstrainedError' || error.name === 'ConstraintNotSatisfiedError') {
+                    log('Попытка с базовыми настройками...');
+                    tryAlternativeConstraints();
+                } else {
+                    handleError(error);
+                }
+            }
+        }
+
+        async function tryAlternativeConstraints() {
+            try {
+                const basicConstraints = {
+                    video: {
+                        facingMode: "environment",
+                        width: { min: 640, ideal: 1280, max: 1920 },
+                        height: { min: 480, ideal: 720, max: 1080 }
+                    }
+                };
+
+                stream = await navigator.mediaDevices.getUserMedia(basicConstraints);
+                cameraFeed.srcObject = stream;
+                
+                cameraFeed.onloadedmetadata = function() {
+                    cameraFeed.play()
+                        .then(() => {
+                            log('Видео с базовыми настройками запущено');
+                            updateStatus('Камера запущена (базовые настройки) ✅', 'success');
+                            cameraFeed.classList.remove('hidden');
+                            startBtn.disabled = true;
+                            stopBtn.disabled = false;
+                        });
+                };
+                
+            } catch (error) {
+                handleError(error);
+            }
+        }
+
+        function handleError(error) {
+            log(`Финальная ошибка: ${error.name} - ${error.message}`);
+            
+            let message = '';
+            switch(error.name) {
+                case 'NotAllowedError':
+                    message = 'Доступ к камере запрещен. Разрешите доступ в настройках браузера.';
+                    break;
+                case 'NotFoundError':
+                    message = 'Камера не найдена. Проверьте подключение камеры.';
+                    break;
+                case 'NotReadableError':
+                    message = 'Камера занята другим приложением.';
+                    break;
+                case 'AbortError':
+                    message = 'Запрос был прерван.';
+                    break;
+                default:
+                    message = `Ошибка: ${error.message}`;
+            }
+            
+            updateStatus(message, 'error');
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => {
+                    track.stop();
+                    log(`Остановлен трек: ${track.kind}`);
+                });
+                stream = null;
+            }
+            
+            cameraFeed.srcObject = null;
+            cameraFeed.classList.add('hidden');
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            updateStatus('Камера остановлена', 'info');
+            log('Камера полностью остановлена');
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', initializeCamera);
+        stopBtn.addEventListener('click', stopCamera);
+
+        // Проверка поддержки
+        log('Проверка поддержки браузера...');
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            const errorMsg = 'Ваш браузер не поддерживает MediaDevices API';
+            log(errorMsg);
+            updateStatus(errorMsg, 'error');
+            startBtn.disabled = true;
+        } else {
+            log('MediaDevices API поддерживается ✅');
+        }
+
+        // Проверка HTTPS
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+            log('ПРЕДУПРЕЖДЕНИЕ: Камера может не работать без HTTPS на мобильных устройствах');
+        }
+
+        log('Готов к работе. Нажмите кнопку для запуска камеры.');
+    </script>
+</body>
+</html>

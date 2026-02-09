@@ -7,32 +7,66 @@ const QRScanner = ({ onScan }) => {
   const [stream, setStream] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null);
+  const [cameraError, setCameraError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
+  // Проверка поддержки камеры
   useEffect(() => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCameraError(true);
+      console.error('Браузер не поддерживает доступ к камере');
+      return;
+    }
+    
+    // Автоматический запуск камеры при монтировании
     const initCamera = async () => {
       try {
+        setIsLoading(true);
+        console.log('Попытка доступа к камере...');
+        
         const mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' }
+          video: { 
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
         });
+        
+        console.log('Камера успешно инициализирована');
         
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
+          videoRef.current.onloadedmetadata = () => {
+            console.log('Видео готово к воспроизведению');
+            videoRef.current.play().catch(err => {
+              console.error('Ошибка воспроизведения видео:', err);
+            });
+          };
           setStream(mediaStream);
           setIsScanning(true);
         }
       } catch (err) {
-        console.error('Error accessing camera:', err);
+        console.error('Ошибка доступа к камере:', err);
+        setCameraError(true);
+        setErrorMessage(`Ошибка камеры: ${err.message}`);
+      } finally {
+        setIsLoading(false);
       }
     };
-
-    initCamera();
-
+    
+    // Небольшая задержка для лучшей совместимости
+    const timer = setTimeout(() => {
+      initCamera();
+    }, 1000);
+    
     return () => {
+      clearTimeout(timer);
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, []);
+  }, [stream]);
 
   useEffect(() => {
     let scanInterval;
@@ -76,6 +110,37 @@ const QRScanner = ({ onScan }) => {
   const restartScanning = () => {
     setScanResult(null);
     setIsScanning(true);
+    // Перезапуск камеры
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    setStream(null);
+    
+    // Повторная инициализация камеры
+    setTimeout(() => {
+      const initCamera = async () => {
+        try {
+          const mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: { 
+              facingMode: 'environment',
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            }
+          });
+          
+          if (videoRef.current) {
+            videoRef.current.srcObject = mediaStream;
+            setStream(mediaStream);
+            setIsScanning(true);
+          }
+        } catch (err) {
+          console.error('Ошибка повторного доступа к камере:', err);
+          alert('Не удалось получить доступ к камере. Проверьте разрешения в настройках браузера.');
+        }
+      };
+      
+      initCamera();
+    }, 300);
   };
 
   return (
@@ -166,21 +231,34 @@ const QRScanner = ({ onScan }) => {
             : 'Выровняйте QR-код в рамках для сканирования'
           }
         </p>
-        {scanResult && (
+        {cameraError && (
+          <div style={{
+            marginTop: '10px',
+            padding: '10px',
+            backgroundColor: '#ffebee',
+            color: '#c62828',
+            borderRadius: '5px',
+            fontSize: '12px'
+          }}>
+            ❌ {errorMessage || 'Не удалось получить доступ к камере. Проверьте разрешения в настройках браузера.'}
+          </div>
+        )}
+        {!isScanning && !scanResult && (
           <button 
             onClick={restartScanning}
+            disabled={isLoading}
             style={{
               marginTop: '10px',
               padding: '8px 16px',
-              backgroundColor: '#ff6b6b',
+              backgroundColor: isLoading ? '#cccccc' : '#4CAF50',
               color: 'white',
               border: 'none',
               borderRadius: '5px',
-              cursor: 'pointer',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
               fontSize: '14px'
             }}
           >
-            Сканировать другой код
+            {isLoading ? '⏳ Запуск камеры...' : '🔴 Запустить камеру'}
           </button>
         )}
       </div>

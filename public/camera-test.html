@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест камеры</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        video {
+            width: 100%;
+            max-width: 500px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 10px 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📷 Тест камеры</h1>
+        
+        <div id="status" class="status info">
+            Нажмите "Запустить камеру" для тестирования
+        </div>
+        
+        <video id="video" autoplay playsinline muted style="display: none;"></video>
+        
+        <div>
+            <button id="startBtn">🔴 Запустить камеру</button>
+            <button id="stopBtn" disabled>⏹ Остановить камеру</button>
+        </div>
+        
+        <div id="log" style="margin-top: 20px; font-family: monospace; font-size: 12px;"></div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const status = document.getElementById('status');
+        const log = document.getElementById('log');
+        let stream = null;
+
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `[${timestamp}] ${message}<br>`;
+            log.scrollTop = log.scrollHeight;
+            console.log(message);
+        }
+
+        function updateStatus(text, type = 'info') {
+            status.textContent = text;
+            status.className = `status ${type}`;
+        }
+
+        async function startCamera() {
+            try {
+                updateStatus('Запрос доступа к камере...', 'info');
+                addLog('Попытка доступа к камере...');
+                
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                });
+
+                addLog('Камера успешно подключена');
+                updateStatus('Камера запущена! ✅', 'success');
+                
+                video.srcObject = stream;
+                video.style.display = 'block';
+                
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                
+                video.onloadedmetadata = () => {
+                    addLog(`Видео готово: ${video.videoWidth}x${video.videoHeight}`);
+                    video.play().catch(err => {
+                        addLog(`Ошибка воспроизведения: ${err.message}`);
+                    });
+                };
+
+            } catch (err) {
+                addLog(`Ошибка: ${err.message}`);
+                updateStatus(`Ошибка: ${err.message}`, 'error');
+                
+                if (err.name === 'NotAllowedError') {
+                    updateStatus('Доступ к камере запрещен. Разрешите доступ в настройках браузера.', 'error');
+                } else if (err.name === 'NotFoundError') {
+                    updateStatus('Камера не найдена.', 'error');
+                }
+            }
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            
+            video.style.display = 'none';
+            video.srcObject = null;
+            
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            updateStatus('Камера остановлена', 'info');
+            addLog('Камера остановлена');
+        }
+
+        startBtn.addEventListener('click', startCamera);
+        stopBtn.addEventListener('click', stopCamera);
+
+        // Проверка поддержки
+        addLog('Проверка поддержки getUserMedia...');
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            updateStatus('Ваш браузер не поддерживает доступ к камере', 'error');
+            addLog('getUserMedia не поддерживается');
+            startBtn.disabled = true;
+        } else {
+            addLog('getUserMedia поддерживается');
+        }
+    </script>
+</body>
+</html>
