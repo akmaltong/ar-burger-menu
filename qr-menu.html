@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR-коды для AR Меню Бургеров</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+
+        .input-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+
+        button {
+            background: #ff9900;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #e68a00;
+        }
+
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .qr-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s;
+        }
+
+        .qr-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .qr-card h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 20px;
+        }
+
+        .qr-card .burger-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .qr-container {
+            margin: 15px auto;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .qr-container img {
+            border: 3px solid #333;
+            border-radius: 8px;
+        }
+
+        .qr-url {
+            font-size: 12px;
+            color: #666;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+
+        .instructions {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .instructions h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .instructions ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+
+        .instructions li {
+            margin: 10px 0;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .print-btn {
+            background: #28a745;
+            margin-top: 20px;
+        }
+
+        .print-btn:hover {
+            background: #218838;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .input-section,
+            .instructions {
+                display: none;
+            }
+
+            .qr-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+
+            .qr-card {
+                box-shadow: none;
+                border: 2px solid #333;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🍔 AR Меню Бургеров</h1>
+        <p class="subtitle">Генератор 4 QR-кодов для меню на столе</p>
+
+        <div class="input-section">
+            <div class="input-group">
+                <input type="text" id="urlInput" placeholder="https://192.168.1.100:8443" value="">
+                <button onclick="generateAllQRs()">Сгенерировать все QR-коды</button>
+            </div>
+        </div>
+
+        <div class="qr-grid">
+            <div class="qr-card">
+                <div class="burger-icon">🍔</div>
+                <h3>Бургер 1</h3>
+                <div class="qr-container" id="qr1"></div>
+                <div class="qr-url" id="url1"></div>
+            </div>
+
+            <div class="qr-card">
+                <div class="burger-icon">🍔</div>
+                <h3>Бургер 2</h3>
+                <div class="qr-container" id="qr2"></div>
+                <div class="qr-url" id="url2"></div>
+            </div>
+
+            <div class="qr-card">
+                <div class="burger-icon">🍔</div>
+                <h3>Бургер 3</h3>
+                <div class="qr-container" id="qr3"></div>
+                <div class="qr-url" id="url3"></div>
+            </div>
+
+            <div class="qr-card">
+                <div class="burger-icon">🍔</div>
+                <h3>Бургер 4</h3>
+                <div class="qr-container" id="qr4"></div>
+                <div class="qr-url" id="url4"></div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h2>📋 Инструкция по использованию:</h2>
+            <ol>
+                <li><strong>Запустите сервер:</strong> <code>npm start</code></li>
+                <li><strong>Скопируйте HTTPS URL</strong> из консоли сервера</li>
+                <li><strong>Вставьте URL</strong> в поле выше и нажмите "Сгенерировать все QR-коды"</li>
+                <li><strong>Нажмите "Печать"</strong> - распечатайте QR-коды</li>
+                <li><strong>Разместите на меню:</strong> Каждый QR-код рядом с описанием соответствующего бургера</li>
+                <li><strong>Гость сканирует QR</strong> камерой телефона → открывается 3D модель конкретного бургера!</li>
+            </ol>
+            <button class="print-btn" onclick="printQRs()">🖨️ Печать QR-кодов</button>
+        </div>
+    </div>
+
+    <script>
+        // Auto-detect local IP
+        function getLocalIP() {
+            return new Promise((resolve) => {
+                const RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
+                if (!RTCPeerConnection) {
+                    resolve('192.168.1.100');
+                    return;
+                }
+                const pc = new RTCPeerConnection({ iceServers: [] });
+                pc.createDataChannel('');
+                pc.createOffer().then(offer => pc.setLocalDescription(offer));
+                pc.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        const match = event.candidate.candidate.match(/(\d+\.\d+\.\d+\.\d+)/);
+                        if (match && !match[1].startsWith('127.')) {
+                            pc.close();
+                            resolve(match[1]);
+                        }
+                    }
+                };
+                setTimeout(() => {
+                    pc.close();
+                    resolve('192.168.1.100');
+                }, 1000);
+            });
+        }
+
+        // Initialize with local IP
+        getLocalIP().then(ip => {
+            document.getElementById('urlInput').value = `https://${ip}:8443`;
+            generateAllQRs();
+        });
+
+        function generateQR(containerId, url, urlDisplayId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            new QRCode(container, {
+                text: url,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            if (urlDisplayId) {
+                document.getElementById(urlDisplayId).textContent = url;
+            }
+        }
+
+        function generateAllQRs() {
+            const baseUrl = document.getElementById('urlInput').value.trim();
+            if (!baseUrl) {
+                alert('Пожалуйста, введите базовый URL');
+                return;
+            }
+
+            // Remove trailing slash if present
+            const cleanBaseUrl = baseUrl.replace(/\/$/, '');
+
+            // Generate QR for each burger
+            generateQR('qr1', `${cleanBaseUrl}/burger1.html`, 'url1');
+            generateQR('qr2', `${cleanBaseUrl}/burger2.html`, 'url2');
+            generateQR('qr3', `${cleanBaseUrl}/burger3.html`, 'url3');
+            generateQR('qr4', `${cleanBaseUrl}/burger4.html`, 'url4');
+        }
+
+        function printQRs() {
+            window.print();
+        }
+    </script>
+</body>
+
+</html>

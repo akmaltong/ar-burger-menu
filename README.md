@@ -89,13 +89,26 @@ https://localhost:8443/qr-generator.html
 
 ### 4. Печать QR-кода и маркеров
 
-1. Распечатайте QR-код из генератора
-2. Скачайте и распечатайте все маркеры:
+**Важно:** Сначала сгенерируйте маркеры A, B, C!
+
+1. **Сгенерируйте маркеры:**
+   - Откройте: `http://localhost:8080/generate-markers.html`
+   - Нажмите "Скачать все маркеры"
+   - Маркеры сохранятся в папку проекта
+
+2. **Отправьте маркеры на GitHub:**
+   ```bash
+   git add a-marker.png b-marker.png c-marker.png
+   git commit -m "Add markers A, B, C"
+   git push
+   ```
+
+3. **Распечатайте все маркеры:**
    - **Все маркеры:** Откройте `https://akmaltong.github.io/ar-burger-menu/all-markers.html`
    - **Или локально:** Откройте `https://localhost:8443/all-markers.html`
-   - Распечатайте все 4 маркера (HIRO, KANJI, A, B)
+   - Распечатайте все 4 маркера (HIRO, A, B, C)
 
-3. Положите QR-код и маркеры на стол
+4. Положите QR-код и маркеры на стол
 
 ### 5. Тестирование
 

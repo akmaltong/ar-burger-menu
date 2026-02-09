@@ -1,215 +1,161 @@
-﻿<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="ru">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>AR Меню Бургеров - 4 Бургера</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Меню Бургеров</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-  <!-- A-Frame and AR.js (pattern marker version) -->
-  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      font-family: sans-serif;
-    }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+        }
 
-    .arjs-loader {
-      height: 100%;
-      width: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      background-color: rgba(0, 0, 0, 0.8);
-      z-index: 9999;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
 
-    .arjs-loader div {
-      text-align: center;
-      font-size: 1.25em;
-      color: white;
-    }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
 
-    /* Error overlay for camera issues */
-    #camera-error {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.9);
-      color: white;
-      z-index: 99999;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      padding: 20px;
-      text-align: center;
-      font-family: sans-serif;
-    }
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
 
-    #camera-error h2 {
-      color: #ff6b6b;
-      margin-bottom: 15px;
-    }
+        .menu-btn {
+            background: #ff9900;
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
 
-    #camera-error p {
-      margin: 8px 0;
-      font-size: 14px;
-      line-height: 1.5;
-    }
+        .menu-btn:hover {
+            background: #e68a00;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
 
-    #camera-error button {
-      margin-top: 20px;
-      padding: 12px 30px;
-      font-size: 16px;
-      background: #ff9900;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-  </style>
+        .menu-btn .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .admin-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+        }
+
+        .admin-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+
+        .admin-btn:hover {
+            background: #218838;
+        }
+
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        @media (max-width: 480px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
-  <!-- Loading indicator -->
-  <div class="arjs-loader">
-    <div>Загрузка аппетитных бургеров... 🍔🍔🍔🍔<br><small>Разрешите доступ к камере</small></div>
-  </div>
+    <div class="container">
+        <h1>🍔 AR Меню Бургеров</h1>
+        <p class="subtitle">Выберите бургер для просмотра в 3D</p>
 
-  <!-- Camera error overlay -->
-  <div id="camera-error">
-    <h2>📷 Камера недоступна</h2>
-    <p>Для работы AR необходим доступ к камере.</p>
-    <p><strong>Возможные причины:</strong></p>
-    <p>1. Вы не разрешили доступ к камере</p>
-    <p>2. Страница открыта не через HTTPS</p>
-    <p>3. Другое приложение использует камеру</p>
-    <p><strong>Решение:</strong> Откройте страницу через HTTPS и разрешите доступ к камере.</p>
-    <button onclick="location.reload()">Попробовать снова</button>
-  </div>
+        <div class="menu-grid">
+            <a href="burger1.html" class="menu-btn">
+                <span class="icon">🍔</span>
+                <span>Бургер 1</span>
+            </a>
 
-  <a-scene vr-mode-ui="enabled: false" renderer="logarithmicDepthBuffer: true; colorManagement: true" embedded
-    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
+            <a href="burger2.html" class="menu-btn">
+                <span class="icon">🍔</span>
+                <span>Бургер 2</span>
+            </a>
 
-    <a-assets>
-      <a-asset-item id="burger1-model" src="models/glb/burger1.glb"></a-asset-item>
-      <a-asset-item id="burger2-model" src="models/glb/burger2.glb"></a-asset-item>
-      <a-asset-item id="burger3-model" src="models/glb/burger3.glb"></a-asset-item>
-      <a-asset-item id="burger4-model" src="models/glb/burger4.glb"></a-asset-item>
-    </a-assets>
+            <a href="burger3.html" class="menu-btn">
+                <span class="icon">🍔</span>
+                <span>Бургер 3</span>
+            </a>
 
-    <!-- Burger 1 - HIRO marker -->
-    <a-marker preset="hiro">
-      <a-entity gltf-model="#burger1-model" scale="0.15 0.15 0.15" position="0 0 0" rotation="-90 0 0"
-        animation="property: rotation; to: -90 360 0; loop: true; dur: 10000; easing: linear">
-      </a-entity>
-    </a-marker>
+            <a href="burger4.html" class="menu-btn">
+                <span class="icon">🍔</span>
+                <span>Бургер 4</span>
+            </a>
+        </div>
 
-    <!-- Burger 2 - KANJI marker -->
-    <a-marker preset="kanji">
-      <a-entity gltf-model="#burger2-model" scale="0.15 0.15 0.15" position="0 0 0" rotation="-90 0 0"
-        animation="property: rotation; to: -90 360 0; loop: true; dur: 10000; easing: linear">
-      </a-entity>
-    </a-marker>
+        <div class="admin-section">
+            <p><strong>Для администратора:</strong></p>
+            <a href="qr-menu.html" class="admin-btn">🖨️ Генератор QR-кодов для меню</a>
+        </div>
 
-    <!-- Burger 3 - A marker -->
-    <a-marker preset="A">
-      <a-entity gltf-model="#burger3-model" scale="0.15 0.15 0.15" position="0 0 0" rotation="-90 0 0"
-        animation="property: rotation; to: -90 360 0; loop: true; dur: 10000; easing: linear">
-      </a-entity>
-    </a-marker>
-
-    <!-- Burger 4 - B marker -->
-    <a-marker preset="B">
-      <a-entity gltf-model="#burger4-model" scale="0.15 0.15 0.15" position="0 0 0" rotation="-90 0 0"
-        animation="property: rotation; to: -90 360 0; loop: true; dur: 10000; easing: linear">
-      </a-entity>
-    </a-marker>
-
-    <a-entity camera></a-entity>
-  </a-scene>
-
-  <script>
-    // Camera access check and error handling
-    (function () {
-      // Check if running on HTTPS or localhost
-      var isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-
-      if (!isSecure) {
-        console.warn('WARNING: Camera access requires HTTPS. Current protocol:', location.protocol);
-        alert('⚠️ Внимание: Для работы камеры необходим HTTPS!\n\nТекущий протокол: ' + location.protocol + '\n\nПожалуйста, откройте страницу через HTTPS.');
-      }
-
-      // Try to detect camera availability
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(function (stream) {
-            console.log('Camera access granted!');
-            // Stop the test stream - AR.js will request its own
-            stream.getTracks().forEach(function (track) { track.stop(); });
-          })
-          .catch(function (err) {
-            console.error('Camera access error:', err.name, err.message);
-            var errorMsg = 'Ошибка доступа к камере: ' + err.name + '\n\n';
-
-            if (err.name === 'NotAllowedError') {
-              errorMsg += 'Вы не разрешили доступ к камере.\nПожалуйста, разрешите доступ и перезагрузите страницу.';
-            } else if (err.name === 'NotFoundError') {
-              errorMsg += 'Камера не найдена на устройстве.';
-            } else if (err.name === 'NotReadableError') {
-              errorMsg += 'Камера используется другим приложением.';
-            } else {
-              errorMsg += 'Сообщение: ' + err.message;
-            }
-
-            document.getElementById('camera-error').querySelector('p').textContent = errorMsg;
-            document.getElementById('camera-error').style.display = 'flex';
-            document.querySelector('.arjs-loader').style.display = 'none';
-          });
-      } else {
-        console.error('getUserMedia not supported');
-        document.getElementById('camera-error').querySelector('p').textContent = 'Ваш браузер не поддерживает доступ к камере.\nПожалуйста, используйте современный браузер (Chrome, Safari, Firefox).';
-        document.getElementById('camera-error').style.display = 'flex';
-        document.querySelector('.arjs-loader').style.display = 'none';
-      }
-
-      // Hide loader when scene is loaded
-      var scene = document.querySelector('a-scene');
-      if (scene) {
-        scene.addEventListener('loaded', function () {
-          var loader = document.querySelector('.arjs-loader');
-          if (loader) loader.style.display = 'none';
-          console.log('AR Scene loaded successfully!');
-        });
-
-        scene.addEventListener('error', function (e) {
-          console.error('AR Scene error:', e);
-          alert('Ошибка загрузки AR сцены: ' + e.detail);
-          document.querySelector('.arjs-loader').style.display = 'none';
-        });
-      }
-
-      // Log AR.js events
-      window.addEventListener('arjs-video-loaded', function () {
-        console.log('AR.js video loaded');
-      });
-
-      window.addEventListener('arjs-error', function (e) {
-        console.error('AR.js error:', e);
-        alert('Ошибка AR.js: ' + e.detail);
-      });
-    })();
-  </script>
+        <div class="info">
+            <strong>Как это работает:</strong><br>
+            1. Генерируете 4 QR-кода на странице выше<br>
+            2. Печатаете и размещаете на бумажном меню<br>
+            3. Гость сканирует QR → видит 3D модель бургера!
+        </div>
+    </div>
 </body>
 
 </html>
